@@ -1,0 +1,37 @@
+{
+  "name": "@graphiti/jsonapi-client",
+  "version": "0.1.0",
+  "description": "Low level Javascript client for Graphiti/JSONAPI APIs",
+  "main": "lib/index.js",
+  "repository": "https://github.com/graphiti/graphiti-js",
+  "author": "Wade Tandy <wade.tandy@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "mocha --opts test/mocha.opts",
+    "test:watch": "yarn test --watch",
+    "lint": "yarn run eslint **/*.ts **/*.js"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "inflected": "2.0.4"
+  },
+  "devDependencies": {
+    "@types/chai": "4.1.4",
+    "@types/mocha": "5.2.5",
+    "@types/node": "10.9.4",
+    "@types/sinon": "5.0.2",
+    "axios-mock-adapter": "1.15.0",
+    "chai": "4.1.2",
+    "eslint": "5.6.0",
+    "eslint-config-prettier": "3.0.1",
+    "eslint-plugin-prettier": "2.6.2",
+    "eslint-plugin-typescript": "0.12.0",
+    "mocha": "5.2.0",
+    "prettier": "1.14.2",
+    "sinon": "6.3.3",
+    "ts-node": "7.0.1",
+    "typescript": "3.0.3",
+    "typescript-eslint-parser": "18.0.0"
+  }
+}
