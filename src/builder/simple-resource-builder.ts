@@ -1,4 +1,4 @@
-import { ResourceBuilder } from "./resource-builder"
+import { IResourceBuilder } from "./resource-builder"
 import {
   JsonapiResponseDocument,
   JsonapiResourceObject,
@@ -15,7 +15,7 @@ export type RecordRelationshipPair = {
   relationships?: JsonapiResourceRelationships
 }
 
-export class SimpleResourceBuilder extends ResourceBuilder {
+export class SimpleResourceBuilder implements IResourceBuilder {
   assembleResourceGraph<T>(
     attributes: Record<string, any>,
     IncludedHash: IncludedHash

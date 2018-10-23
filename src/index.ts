@@ -6,21 +6,18 @@ import {
   JsonapResourceListResponseDocument,
 } from "./jsonapi-spec"
 
-import { ResourceBuilder } from "./builder/resource-builder"
+import { IResourceBuilder } from "./builder/resource-builder"
 import { SimpleResourceBuilder } from "./builder/simple-resource-builder"
 
 export * from "./jsonapi-spec"
 
-export {
-  SimpleResourceBuilder,
-  ResourceBuilder
-}
+export { SimpleResourceBuilder, IResourceBuilder }
 
 export class Client {
   private _adapter: HTTPAdapter
-  private _builder: ResourceBuilder
+  private _builder: IResourceBuilder
 
-  constructor(opts?: { adapter?: HTTPAdapter; builder?: ResourceBuilder }) {
+  constructor(opts?: { adapter?: HTTPAdapter; builder?: IResourceBuilder }) {
     opts = opts || {}
 
     this._adapter = opts.adapter || new AxiosAdapter()
