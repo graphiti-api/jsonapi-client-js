@@ -1,3 +1,5 @@
+--reporter mocha-multi-reporters
+--reporter-options configFile=test/mocha-reporter-config.json
 --require test/tshook.js
 --watch-extensions ts
 test/**/*.test.ts
