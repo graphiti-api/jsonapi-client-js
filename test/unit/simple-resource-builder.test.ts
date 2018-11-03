@@ -1,122 +1,296 @@
-import { SimpleResourceBuilder, JsonapiResponseDocument } from "../../src"
+import {
+  SimpleResourceBuilder,
+  JsonapiResponseDocument,
+  JsonapiSuccessResponseDocument,
+} from "../../src"
 import { expect } from "chai"
+import { RecordAssociationHash } from "@/builder/resource-builder"
 
 const builder = new SimpleResourceBuilder()
 
 describe("SimpleResourceBuilder", () => {
-  describe("#buildAttributesHash", () => {
-    it("returns an object with the id and the attributes", () => {
-      let attrs = builder.buildRecord({
+  describe("#buildIntermediateData", () => {
+    it("returns an object containing the record and the relationships", () => {
+      let responseRecord = {
         id: "123abc",
         type: "foo",
         attributes: {
           name: "Test",
           age: 10,
         },
-      })
+        relationships: {
+          currentBar: {
+            data: {
+              id: "456",
+              type: "bars",
+            },
+          },
+          bars: {
+            data: [
+              {
+                id: "456",
+                type: "bars",
+              },
+              {
+                id: "789",
+                type: "bars",
+              },
+            ],
+          },
+        },
+      }
 
-      expect(attrs).to.deep.eq({
+      let {
+        attributes,
+        relationshipIdentifiers,
+        record,
+        visited,
+      } = builder.buildIntermediateData(responseRecord)
+
+      expect(attributes).to.deep.eq({
         id: "123abc",
         name: "Test",
         age: 10,
       })
-    })
 
-    it("does not include relationships in the attributes", () => {
-      let attrs = builder.buildRecord({
-        id: "123abc",
-        type: "foo",
-        attributes: {},
-        relationships: {
-          bar: {
-            data: {
-              type: "others",
-              id: "345",
-            },
-          },
-        },
-      })
-
-      expect(attrs.bar).to.be.undefined
+      expect(relationshipIdentifiers).to.deep.eq(responseRecord.relationships)
+      expect(record).to.deep.eq(attributes)
+      expect(visited).to.be.false
     })
   })
 
-  describe("#buildIncludedHash", () => {
-    context("when included is undefined", () => {
-      it("returns an empty object", () => {
-        expect(builder.buildIncludedHash({} as any)).to.deep.eq({})
+  describe("#buildIntermediateResultsHash", () => {
+    context("when when root data is sigular", () => {
+      let rootRecord = {
+        id: "123abc",
+        type: "foo",
+        attributes: {
+          name: "Test",
+          age: 10,
+        },
+        relationships: {
+          currentBar: {
+            data: {
+              id: "456",
+              type: "bars",
+            },
+          },
+        },
+      }
+
+      it("includes the intermediate record in the hash", () => {
+        let result = builder.buildIntermediateResultsHash({
+          data: rootRecord,
+        } as any)
+
+        expect(result).to.deep.eq({
+          foo: {
+            "123abc": {
+              attributes: {
+                age: 10,
+                id: "123abc",
+                name: "Test",
+              },
+              record: {
+                age: 10,
+                id: "123abc",
+                name: "Test",
+              },
+              relationshipIdentifiers: {
+                currentBar: {
+                  data: {
+                    id: "456",
+                    type: "bars",
+                  },
+                },
+              },
+              visited: false,
+            },
+          },
+        })
       })
     })
 
-    it.only("returns a deep hash indexed by type and id", () => {
-      let responseDoc: JsonapiResponseDocument = {
-        data: [],
-        included: [
-          {
-            type: "foos",
-            id: "1",
-            attributes: {
-              name: "first foo",
-            },
+    context("when when root data is plural", () => {
+      let rootRecord = [
+        {
+          id: "123abc",
+          type: "foo",
+          attributes: {
+            name: "Test",
+            age: 10,
           },
-          {
-            type: "foos",
-            id: "2",
-            attributes: {
-              name: "second foo",
-            },
-            relationships: {
-              theBar: {
-                data: {
-                  id: "2",
-                  type: "bars",
-                },
+          relationships: {
+            currentBar: {
+              data: {
+                id: "456",
+                type: "bars",
               },
             },
           },
-          {
-            type: "bars",
-            id: "2",
-            attributes: {
-              title: "the bar",
+        },
+        {
+          id: "def456",
+          type: "foo",
+          attributes: {
+            name: "Another",
+            age: 12,
+          },
+          relationships: {
+            currentBar: {
+              data: {
+                id: "456",
+                type: "bars",
+              },
             },
           },
-        ],
-      } as any
+        },
+      ]
 
-      let result = builder.buildIncludedHash(responseDoc)
+      it("includes intermediate records for all items in the hash", () => {
+        let result = builder.buildIntermediateResultsHash({
+          data: rootRecord,
+        } as any)
 
-      expect(result).to.deep.eq({
-        foos: {
-          "1": {
-            record: {
+        expect(result).to.deep.eq({
+          foo: {
+            "123abc": {
+              attributes: {
+                age: 10,
+                id: "123abc",
+                name: "Test",
+              },
+              record: {
+                age: 10,
+                id: "123abc",
+                name: "Test",
+              },
+              relationshipIdentifiers: {
+                currentBar: {
+                  data: {
+                    id: "456",
+                    type: "bars",
+                  },
+                },
+              },
+              visited: false,
+            },
+            def456: {
+              attributes: {
+                age: 12,
+                id: "def456",
+                name: "Another",
+              },
+              record: {
+                age: 12,
+                id: "def456",
+                name: "Another",
+              },
+              relationshipIdentifiers: {
+                currentBar: {
+                  data: {
+                    id: "456",
+                    type: "bars",
+                  },
+                },
+              },
+              visited: false,
+            },
+          },
+        })
+      })
+    })
+
+    context("when there is an included hash", () => {
+      it("returns a deep hash indexed by type and id", () => {
+        let responseDoc: JsonapiSuccessResponseDocument = {
+          data: [],
+          included: [
+            {
+              type: "foos",
               id: "1",
-              name: "first foo",
+              attributes: {
+                name: "first foo",
+              },
             },
-          },
-          "2": {
-            record: {
+            {
+              type: "foos",
               id: "2",
-              name: "second foo",
-            },
-            relationships: {
-              theBar: {
-                data: {
-                  id: "2",
-                  type: "bars",
+              attributes: {
+                name: "second foo",
+              },
+              relationships: {
+                theBar: {
+                  data: {
+                    id: "2",
+                    type: "bars",
+                  },
                 },
               },
             },
-          },
-        },
-        bars: {
-          "2": {
-            record: {
+            {
+              type: "bars",
               id: "2",
-              title: "the bar",
+              attributes: {
+                title: "the bar",
+              },
+            },
+          ],
+        } as any
+
+        let result: RecordAssociationHash<
+          Record<string, any>
+        > = builder.buildIntermediateResultsHash(responseDoc)
+
+        expect(result).to.deep.eq({
+          foos: {
+            "1": {
+              attributes: {
+                id: "1",
+                name: "first foo",
+              },
+              record: {
+                id: "1",
+                name: "first foo",
+              },
+              relationshipIdentifiers: {},
+              visited: false,
+            },
+            "2": {
+              attributes: {
+                id: "2",
+                name: "second foo",
+              },
+              record: {
+                id: "2",
+                name: "second foo",
+              },
+              relationshipIdentifiers: {
+                theBar: {
+                  data: {
+                    id: "2",
+                    type: "bars",
+                  },
+                },
+              },
+              visited: false,
             },
           },
-        },
+          bars: {
+            "2": {
+              attributes: {
+                id: "2",
+                title: "the bar",
+              },
+              record: {
+                id: "2",
+                title: "the bar",
+              },
+              relationshipIdentifiers: {},
+              visited: false,
+            },
+          },
+        })
       })
     })
   })

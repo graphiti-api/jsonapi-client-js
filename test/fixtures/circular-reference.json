@@ -1,0 +1,41 @@
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": [{
+    "id": "12345",
+    "type": "employees",
+    "attributes": {
+      "first_name": "Frank",
+      "last_name": "Abagnale",
+      "age": 17
+    },
+    "relationships": {
+      "manager": {
+        "data": {
+          "type": "employees",
+          "id": "6789"
+        }
+      },
+      "subordinates": {
+        "data": []
+      }
+    }
+  }, {
+    "id": "6789",
+    "type": "employees",
+    "attributes": {
+      "first_name": "Frank",
+      "last_name": "Conners",
+      "age": 21
+    },
+    "relationships": {
+      "subordinates": {
+        "data": [{
+          "type": "employees",
+          "id": "12345"
+        }]
+      }
+    }
+  }]
+}

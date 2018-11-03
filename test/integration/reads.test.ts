@@ -93,18 +93,54 @@ describe("Nested Resource Lookup", () => {
 
       expect(employee).to.deep.eq([
         {
-          id: "12345",
-          first_name: "Frank",
-          last_name: "Abagnale",
           age: 17,
+          current_position: {
+            id: "1",
+            title: "Student",
+          },
+          first_name: "Frank",
+          id: "12345",
+          last_name: "Abagnale",
+          positions: [],
         },
         {
-          id: "6789",
-          first_name: "Frank",
-          last_name: "Conners",
           age: 21,
+          current_position: {
+            id: "2",
+            title: "Doctor",
+          },
+          first_name: "Frank",
+          id: "6789",
+          last_name: "Conners",
+          positions: [
+            {
+              id: "2",
+              title: "Doctor",
+            },
+            {
+              id: "3",
+              title: "Lawyer",
+            },
+          ],
         },
       ])
+    })
+  })
+
+  describe("Resources with circular references", () => {
+    const stubResponse = require("../fixtures/circular-reference.json")
+    const resourceUrl =
+      "http://example.com/v1/employees?include=manager,subordinates"
+
+    beforeEach(() => {
+      mock.onGet(resourceUrl).reply(200, stubResponse)
+    })
+
+    it("Builds a list of record objects", async () => {
+      let employees = await client.getList(resourceUrl)
+
+      expect(employees[0].manager).to.eq(employees[1])
+      expect(employees[1].subordinates[0]).to.eq(employees[0])
     })
   })
 })

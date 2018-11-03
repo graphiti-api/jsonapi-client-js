@@ -3,7 +3,7 @@ import {
   JsonapiResponseDocument,
   JsonapiResourceObject,
   JsonapiResourceResponseDocument,
-  JsonapResourceListResponseDocument,
+  JsonapiResourceListResponseDocument,
 } from "./jsonapi-spec"
 
 import { IResourceBuilder } from "./builder/resource-builder"
@@ -15,26 +15,28 @@ export { SimpleResourceBuilder, IResourceBuilder }
 
 export class Client {
   private _adapter: HTTPAdapter
-  private _builder: IResourceBuilder
+  private _builder: IResourceBuilder<any>
 
-  constructor(opts?: { adapter?: HTTPAdapter; builder?: IResourceBuilder }) {
+  constructor(opts?: {
+    adapter?: HTTPAdapter
+    builder?: IResourceBuilder<any>
+  }) {
     opts = opts || {}
 
     this._adapter = opts.adapter || new AxiosAdapter()
     this._builder = opts.builder || new SimpleResourceBuilder()
   }
 
-  async get<T = Record<string, any>>(url: string) {
+  async get<T = Record<string, any>>(url: string): Promise<any> {
     let response = await this._adapter.get<JsonapiResponseDocument>(url)
     let doc = response.data as JsonapiResourceResponseDocument
-    let relationships = this._builder.buildIncludedHash(doc)
-    // return this._builder.buildResource<T>(doc.data)
+    return this._builder.buildDocumentResources(doc)
   }
 
   async getList<T = Record<string, any>>(url: string) {
     let response = await this._adapter.get<JsonapiResponseDocument>(url)
-    let doc = response.data as JsonapResourceListResponseDocument
-    // return doc.data.map(item => this._builder.buildResource<T>(item))
+    let doc = response.data as JsonapiResourceListResponseDocument
+    return this._builder.buildDocumentResources(doc)
   }
 }
 

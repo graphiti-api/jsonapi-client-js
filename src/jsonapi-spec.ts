@@ -119,20 +119,24 @@ export interface JsonapiResponseAPIMeta {
 
 export type JsonapiResponseDocument =
   | JsonapiResourceResponseDocument
-  | JsonapResourceListResponseDocument
+  | JsonapiResourceListResponseDocument
   | JsonapiErrorResponseDocument
 
-export interface JsonapiSuccessResponseDocument<Data> {
+export interface JsonapiDataDocument<Data> {
   data: Data
   included: JsonapiResourceObject[]
   errors?: undefined
 }
 
 export type JsonapiResourceResponseDocument = JsonapiResponseAPIMeta &
-  JsonapiSuccessResponseDocument<JsonapiResourceObject>
+  JsonapiDataDocument<JsonapiResourceObject>
 
-export type JsonapResourceListResponseDocument = JsonapiResponseAPIMeta &
-  JsonapiSuccessResponseDocument<JsonapiResourceObject[]>
+export type JsonapiResourceListResponseDocument = JsonapiResponseAPIMeta &
+  JsonapiDataDocument<JsonapiResourceObject[]>
+
+export type JsonapiSuccessResponseDocument =
+  | JsonapiResourceResponseDocument
+  | JsonapiResourceListResponseDocument
 
 export interface JsonapiErrorResponseDocument extends JsonapiResponseAPIMeta {
   data?: undefined
