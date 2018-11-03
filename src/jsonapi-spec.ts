@@ -16,14 +16,14 @@ export interface JsonapiResourceIdentifier extends JsonapiResourceIds {
 export type JsonapiResourceAttributes = Record<string, any>
 export type JsonapiResourceLinks = Record<string, JsonapiLink>
 
-export type JsonapiResourceRelationships = Record<
+export type JsonapiResourceRelationshipIdentifiers = Record<
   string,
   { data: JsonapiResourceIdentifier | JsonapiResourceIdentifier[] }
 >
 
 export interface JsonapiResourceObject extends JsonapiResourceIdentifier {
   attributes: JsonapiResourceAttributes // but not `relationships` or `links`
-  relationships?: JsonapiResourceRelationships
+  relationships?: JsonapiResourceRelationshipIdentifiers
   links?: JsonapiResourceLinks
 }
 
