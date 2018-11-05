@@ -84,10 +84,11 @@ export abstract class ResourceBuilder<T> implements IResourceBuilder<T> {
   buildIntermediateData(
     resourceResponse: JsonapiResourceObject
   ): RecordData<T> {
-    let attrs: Record<string, any> = {
-      id: resourceResponse.id as string,
-      ...resourceResponse.attributes,
-    }
+    // Need to benchmark this.  May be worth adding lodash.clonedeep
+    let attrs: Record<string, any> = JSON.parse(
+      JSON.stringify(resourceResponse.attributes)
+    )
+    attrs.id = resourceResponse.id as string
 
     let result: RecordData<T> = {
       attributes: attrs as any,

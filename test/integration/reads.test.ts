@@ -95,8 +95,8 @@ describe("Nested Resource Lookup", () => {
         {
           age: 17,
           current_position: {
-            id: "1",
-            title: "Student",
+            id: "2",
+            title: "Doctor",
           },
           first_name: "Frank",
           id: "12345",

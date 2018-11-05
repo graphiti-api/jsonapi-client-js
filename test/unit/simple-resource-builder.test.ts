@@ -111,7 +111,7 @@ describe("SimpleResourceBuilder", () => {
       })
     })
 
-    context("when when root data is plural", () => {
+    context("when when root data is an array", () => {
       let rootRecord = [
         {
           id: "123abc",
@@ -291,6 +291,66 @@ describe("SimpleResourceBuilder", () => {
             },
           },
         })
+      })
+    })
+    it("deep clones all attribute objects", () => {
+      let rootRecord = {
+        id: "123abc",
+        type: "foo",
+        attributes: {
+          name: "Test",
+          age: 10,
+          someObject: {
+            foo: "bar",
+            baz: "zab",
+          },
+        },
+      }
+
+      let result = builder.buildIntermediateResultsHash({
+        data: rootRecord,
+      } as any)
+
+      let deepAttr = result.foo["123abc"].attributes.someObject
+      expect(deepAttr).to.deep.eq({
+        foo: "bar",
+        baz: "zab",
+      })
+      expect(deepAttr).not.to.eq(rootRecord.attributes.someObject)
+    })
+  })
+
+  describe("#buildDocumentResources", () => {
+    let doc: JsonapiSuccessResponseDocument
+
+    let build = () => {
+      return builder.buildDocumentResources(doc)
+    }
+
+    context("when processing a series of nested resources", () => {
+      beforeEach(() => {
+        doc = require("../fixtures/nested-list.json")
+      })
+
+      it("shares references across the graph", () => {
+        let result = build() as Record<string, any>[]
+
+        expect(result[0].current_position).not.to.be.undefined
+        expect(result[0].current_position).to.eq(result[1].positions[0])
+      })
+    })
+
+    context("when loading circular references", () => {
+      beforeEach(() => {
+        doc = require("../fixtures/circular-reference.json")
+      })
+
+      it("does not duplicate objects", () => {
+        let result = build() as Record<string, any>[]
+
+        expect(result[0]).not.to.be.undefined
+        expect(result[0]).to.eq(result[0].manager.subordinates[0])
+        expect(result[0]).to.eq(result[1].subordinates[0])
       })
     })
   })
