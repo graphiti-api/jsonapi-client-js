@@ -3,7 +3,7 @@ import { ResourceBuilder } from "./resource-builder"
 export class SimpleResourceBuilder<
   T extends Record<string, any>
 > extends ResourceBuilder<T> {
-  buildRecord(attributes: Record<string, any>): T {
+  buildRecord(type: string, attributes: Record<string, any>): T {
     return { ...attributes } as T
   }
 

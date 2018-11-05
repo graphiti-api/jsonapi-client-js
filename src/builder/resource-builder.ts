@@ -32,7 +32,7 @@ export interface IResourceBuilder<T> {
   buildDocumentResources(doc: JsonapiResourceResponseDocument): T
   buildDocumentResources(doc: JsonapiResourceListResponseDocument): T[]
 
-  buildRecord(attributes: Record<any, string>): T
+  buildRecord(type: string, attributes: Record<any, string>): T
 }
 
 export abstract class ResourceBuilder<T> implements IResourceBuilder<T> {
@@ -52,7 +52,7 @@ export abstract class ResourceBuilder<T> implements IResourceBuilder<T> {
     }
   }
 
-  public abstract buildRecord(attributes: Record<string, any>): T
+  public abstract buildRecord(type: string, attributes: Record<string, any>): T
 
   public abstract assignAssociations(
     record: T,
@@ -92,7 +92,7 @@ export abstract class ResourceBuilder<T> implements IResourceBuilder<T> {
 
     let result: RecordData<T> = {
       attributes: attrs as any,
-      record: this.buildRecord(attrs),
+      record: this.buildRecord(attrs.type, attrs),
       relationshipIdentifiers: resourceResponse.relationships || {},
       visited: false,
     }
